@@ -51,6 +51,13 @@ def _format_number_to_string(format_vals: tuple[int, int], val: Union[int, float
     return result
 
 
+def _fix_midway_files(midway_files: list[Path]):
+    for midway_file in midway_files:
+        fixed_name = midway_file.with_name(midway_file.name.strip('.mid'))
+        midway_file.rename(fixed_name)
+        logger.debug('Fixed midway name for {}'.format(fixed_name))
+
+
 def main(args):
     _setup_logging(args.verbose)
 
@@ -63,13 +70,15 @@ def main(args):
         change = 0
 
     pattern = re.compile(args.expression)
-    files = reversed(sorted([Path(file) for file in args.files]))
+    files = [Path(file) for file in args.files]
+    midway_files = []
     for file in files:
         if catches := re.search(pattern, file.name):
             catches = catches.groups()
         else:
             logger.error('No match found in file name {} with regex string {}'.format(file.name, pattern))
             continue
+        new_path = file
         for catch in catches:
             if not re.match(r'[.\d]+', catch):
                 logger.warning(f'Could not change capture {catch}')
@@ -79,14 +88,18 @@ def main(args):
             number += change
             replacement = _format_number_to_string(number_format, number)
             new_path = file.with_name(file.name.replace(catch, replacement))
-            if args.no_act:
-                logger.info('Rename: {} -> {}'.format(file, new_path))
-            else:
-                logger.info('Renaming file {} to {}'.format(file, new_path))
-                try:
-                    file.rename(new_path)
-                except OSError:
-                    logger.error('{} already exists'.format(new_path))
+        if args.no_act:
+            logger.info('Rename: {} -> {}'.format(file, new_path))
+        else:
+            logger.info('Renaming file {} to {}'.format(file, new_path))
+            midway_name = new_path.with_name(new_path.name + '.mid')
+            midway_files.append(midway_name)
+            try:
+                file.rename(midway_name)
+            except OSError:
+                logger.error('{} already exists'.format(new_path))
+
+    _fix_midway_files(midway_files)
 
 
 if __name__ == '__main__':
