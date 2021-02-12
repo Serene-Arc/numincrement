@@ -58,6 +58,18 @@ def _fix_midway_files(midway_files: list[Path]):
         logger.debug('Fixed midway name for {}'.format(fixed_name))
 
 
+def change_path_name(catch: re.Match, change: int, file: Path) -> Path:
+    new_path = file
+    for m, match in enumerate(catch.groups(), start=1):
+        number_format = _get_number_format(match)
+        number = float(match)
+        number += change
+        replacement = _format_number_to_string(number_format, number)
+        new_name = new_path.name[:catch.start(m)] + replacement + new_path.name[catch.end(m):]
+        new_path = new_path.with_name(new_name)
+    return new_path
+
+
 def main(args):
     _setup_logging(args.verbose)
 
@@ -73,21 +85,10 @@ def main(args):
     files = [Path(file) for file in args.files]
     midway_files = []
     for file in files:
-        if catches := re.search(pattern, file.name):
-            catches = catches.groups()
-        else:
+        if not (catches := re.search(pattern, file.name)):
             logger.error('No match found in file name {} with regex string {}'.format(file.name, pattern))
             continue
-        new_path = file
-        for catch in catches:
-            if not re.match(r'[.\d]+', catch):
-                logger.warning(f'Could not change capture {catch}')
-                continue
-            number_format = _get_number_format(catch)
-            number = float(catch)
-            number += change
-            replacement = _format_number_to_string(number_format, number)
-            new_path = file.with_name(file.name.replace(catch, replacement))
+        new_path = change_path_name(catches, change, file)
         if args.no_act:
             logger.info('Rename: {} -> {}'.format(file, new_path))
         else:
