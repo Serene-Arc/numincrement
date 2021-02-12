@@ -49,11 +49,16 @@ def test_format_number_string(test_value: [int, float], test_format: tuple[int, 
 
 
 @pytest.mark.parametrize(('test_expression', 'test_path', 'change', 'expected'), (
-    (r'(\d)_(\d)', Path('1_2.txt'), 1, Path('2_3.txt')),
-    (r'(\d)_\d', Path('1_2.txt'), 1, Path('2_2.txt')),
     (r'(\d)', Path('1.txt'), 1, Path('2.txt')),
     (r'(\d)', Path('1.txt'), -1, Path('0.txt')),
     (r'(\d)', Path('1_2.txt'), 1, Path('2_2.txt')),
+    (r'(\d)_(\d)', Path('1_2.txt'), 1, Path('2_3.txt')),
+    (r'(\d)_\d', Path('1_2.txt'), 1, Path('2_2.txt')),
+    (r'_(\d)', Path('1_2.txt'), 1, Path('1_3.txt')),
+    (r'_(\d)', Path('1_20.txt'), 1, Path('1_30.txt')),
+    (r'_(\d+)', Path('3_21.txt'), 1, Path('3_22.txt')),
+    (r'_\d(\d+)', Path('3_21.txt'), -3, Path('3_2-2.txt')),
+    (r'_\d(\d+)', Path('3_21.txt'), 10, Path('3_211.txt')),
 ))
 def test_path_generation(test_expression: str, test_path: Path, change: int, expected: Path):
     catches = re.search(test_expression, test_path.name)
@@ -62,17 +67,21 @@ def test_path_generation(test_expression: str, test_path: Path, change: int, exp
     assert result == expected
 
 
-@pytest.mark.parametrize(('test_paths', 'test_expression', 'expected_files'), (
-    (('1.txt', '2.txt'), r'^(\d)', ('2.txt', '3.txt')),
+@pytest.mark.parametrize(('test_paths', 'test_expression', 'change', 'expected_files'), (
+    (('1.txt', '2.txt'), r'^(\d)', 1, ('2.txt', '3.txt')),
+    (('1.txt', '1_2.txt'), r'^(\d)', 1, ('2.txt', '2_2.txt')),
+    (('1_1.txt', '2.txt', '3_1.txt'), r'_(\d)', 1, ('1_2.txt', '2.txt', '3_2.txt')),
 ))
 def test_integration(
         args: argparse.Namespace,
         test_paths: list[str],
         test_expression: str,
+        change: int,
         expected_files: list[str],
         tmp_path: Path):
-    args.files.append(Path(tmp_path / '1.txt'))
-    args.files.append(Path(tmp_path / '2.txt'))
+    args.increment = change
+    args.expression = test_expression
+    args.files = [Path(tmp_path / test_string) for test_string in test_paths]
     for file in args.files:
         file.touch()
     numincrement.main(args)
