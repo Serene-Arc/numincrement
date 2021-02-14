@@ -62,7 +62,11 @@ def change_path_name(catch: re.Match, change: int, file: Path) -> Path:
     new_path = file
     for m, match in enumerate(catch.groups(), start=1):
         number_format = _get_number_format(match)
-        number = float(match)
+        try:
+            number = float(match)
+        except ValueError:
+            logger.error('{} is not a string which can be incremented/decremented'.format(match))
+            continue
         number += change
         replacement = _format_number_to_string(number_format, number)
         new_name = new_path.name[:catch.start(m)] + replacement + new_path.name[catch.end(m):]
@@ -84,13 +88,14 @@ def main(args):
     pattern = re.compile(args.expression)
     files = [Path(file) for file in args.files]
     midway_files = []
+
     for file in files:
-        if not (catches := re.search(pattern, file.name)):
+        if not (match_hits := re.search(pattern, file.name)):
             logger.error('No match found in file name {} with regex string {}'.format(file.name, pattern))
             continue
-        new_path = change_path_name(catches, change, file)
+        new_path = change_path_name(match_hits, change, file)
         if args.no_act:
-            logger.info('Rename: {} -> {}'.format(file, new_path))
+            print('Rename: {} -> {}'.format(file, new_path))
         else:
             logger.info('Renaming file {} to {}'.format(file, new_path))
             midway_name = new_path.with_name(new_path.name + '.mid')
