@@ -15,7 +15,6 @@ def _add_options():
     parser.add_argument('expression', type=str)
     parser.add_argument('files', nargs='+')
     parser.add_argument('-n', '--no-act', action='store_true')
-    parser.add_argument('-l', '--lazy', action='store_true')
 
     change_options = parser.add_mutually_exclusive_group()
     change_options.add_argument('-i', '--increment', type=int, default=None, nargs='?', const=1)
