@@ -108,7 +108,11 @@ def main(args):
     _fix_midway_files(midway_files)
 
 
-if __name__ == '__main__':
+def cmd_entry():
     _add_options()
     args = parser.parse_args()
     main(args)
+
+
+if __name__ == '__main__':
+    cmd_entry()
