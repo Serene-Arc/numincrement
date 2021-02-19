@@ -42,6 +42,8 @@ def test_get_number_format(test_string: str, expected: tuple[int, int]):
                                                                      (Decimal('1.5'), (1, 1), '1.5'),
                                                                      (Decimal('2.5'), (2, 2), '02.50'),
                                                                      (Decimal('1'), (5, 0), '00001'),
+                                                                     (Decimal('1.5'), (0, 1), '1.5'),
+                                                                     (Decimal('1.5'), (1, 0), '1.5'),
                                                                      ))
 def test_format_number_string(test_value: Decimal, test_format: tuple[int, int], expected: str):
     result = numincrement._format_number_to_string(test_format, test_value)
