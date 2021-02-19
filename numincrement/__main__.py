@@ -57,7 +57,7 @@ def _fix_midway_files(midway_files: list[Path]):
         logger.debug('Fixed midway name for {}'.format(fixed_name))
 
 
-def change_path_name(catch: re.Match, change: int, file: Path) -> Path:
+def change_path_name(catch: re.Match, change: Union[int, float], file: Path) -> Path:
     new_path = file
     for m, match in enumerate(catch.groups(), start=1):
         number_format = _get_number_format(match)
