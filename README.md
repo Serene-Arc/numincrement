@@ -4,6 +4,8 @@ This is a simple tool to increment numbers in a filename or sequence of file nam
 
 The program can be run with `python3 -m numincrement` or the shorter `numincrement` commands.
 
+Additionally, the format of the supplied numbers will be preserved. For example, 001 will be incremented to 002, not simply 2. This is also the case for decimal numbers
+
 ## Arguments and Options
 
 The following arguments and options are available for the program:
@@ -30,3 +32,8 @@ The following commands showcase the use of the tool:
 
   - `numincrement -i 1 '^(\d+)' *.txt`
   - `numincrement -i -1 'image_(\d+)' *.png`
+
+In the case of the last example, the files would be renamed in the following manner:
+  - `image_01.png` -> `image_00.png`
+  - `image_02.png` -> `image_01.png`
+  - `image_03.png` -> `image_02.png`
