@@ -4,8 +4,8 @@ import argparse
 import logging
 import re
 import sys
+from decimal import Decimal
 from pathlib import Path
-from typing import Union
 
 logger = logging.getLogger()
 parser = argparse.ArgumentParser()
@@ -17,8 +17,8 @@ def _add_options():
     parser.add_argument('-n', '--no-act', action='store_true')
 
     change_options = parser.add_mutually_exclusive_group()
-    change_options.add_argument('-i', '--increment', type=int, default=None, nargs='?', const=1)
-    change_options.add_argument('-d', '--decrement', type=int, default=None, nargs='?', const=1)
+    change_options.add_argument('-i', '--increment', type=Decimal, default=None, nargs='?', const=1)
+    change_options.add_argument('-d', '--decrement', type=Decimal, default=None, nargs='?', const=1)
 
     parser.add_argument('-v', '--verbose', action='count', default=0)
 
@@ -40,7 +40,7 @@ def _get_number_format(in_string: str) -> tuple[int, int]:
     return len(match[1]), len(match[2])
 
 
-def _format_number_to_string(format_vals: tuple[int, int], val: Union[int, float]) -> str:
+def _format_number_to_string(format_vals: tuple[int, int], val: Decimal) -> str:
     end = str(val - int(val)) if (val - int(val)) else ''
     if end:
         end = end.split('.')[-1].ljust(format_vals[1], '0')
@@ -57,12 +57,12 @@ def _fix_midway_files(midway_files: list[Path]):
         logger.debug('Fixed midway name for {}'.format(fixed_name))
 
 
-def change_path_name(catch: re.Match, change: Union[int, float], file: Path) -> Path:
+def change_path_name(catch: re.Match, change: Decimal, file: Path) -> Path:
     new_path = file
     for m, match in enumerate(catch.groups(), start=1):
         number_format = _get_number_format(match)
         try:
-            number = float(match)
+            number = Decimal(match)
         except ValueError:
             logger.error('{} is not a string which can be incremented/decremented'.format(match))
             continue
