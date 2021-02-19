@@ -37,3 +37,11 @@ In the case of the last example, the files would be renamed in the following man
   - `image_01.png` -> `image_00.png`
   - `image_02.png` -> `image_01.png`
   - `image_03.png` -> `image_02.png`
+
+### Decimal Increments
+
+The tool can handle incrementing decimal numbers, or applying decimals to a number in the filename. For example, an increment of `-i 0.5` on a file named `image_1.png` will result in a file named `image_1.5.png`.
+
+The decimal increment will also preserve formatting as much as possible. For example, a decimal represented as `01.000` and incremented by 0.5 will retain the same number of digits, becoming `01.500`. However, the increment will add the necessary digits required to represent the number, so `1.0` incremented by `0.01` will become `1.01`.
+
+When incrementing a decimal already in a name, note that the decimal point must be included in the capture group, as the `\d` regex group does not include it. For the capture for the above example, `image_([\d.]+)` would be required in order to properly increment the filename. 
